@@ -9,15 +9,18 @@ from openai import OpenAI
 app = Flask(__name__)
 CORS(app)
 
-# === OPENROUTER API (FREE) ===
+# === OPENROUTER (FREE) ===
 client = OpenAI(
     api_key=os.getenv("OPENROUTER_API_KEY"),
     base_url="https://openrouter.ai/api/v1"
 )
 
-# === LOAD & INDEX DATA ===
-with open('ashoka_info.txt', 'r', encoding='utf-8') as f:
-    text = f.read()
+# === LOAD DATA ===
+try:
+    with open('ashoka_info.txt', 'r', encoding='utf-8') as f:
+        text = f.read()
+except:
+    text = "Ashoka Institute offers B.Tech, M.Tech, MBA. Contact: info@ashoka.edu.in"
 
 def chunk(text, size=500, overlap=50):
     return [text[i:i+size] for i in range(0, len(text), size-overlap)]
@@ -25,7 +28,6 @@ def chunk(text, size=500, overlap=50):
 chunks = chunk(text)
 embedder = SentenceTransformer('all-MiniLM-L6-v2')
 vectors = embedder.encode(chunks).astype('float32')
-
 index = faiss.IndexFlatL2(vectors.shape[1])
 index.add(vectors)
 print(f"Indexed {len(chunks)} chunks.")
@@ -59,15 +61,17 @@ def chat():
 
     try:
         resp = client.chat.completions.create(
-            model="deepseek/deepseek-r1:free",  # FREE MODEL
+            model="deepseek/deepseek-r1:free",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=500
         )
         answer = resp.choices[0].message.content.strip()
     except Exception as e:
-        answer = f"API error: {e}"
+        answer = f"AI error: {e}"
 
     return jsonify({'response': answer})
 
-if __name__ == '__main__':
-    app.run()
+# Vercel entry point
+def handler(event, context=None):
+    from werkzeug.serving import run_simple
+    return run_simple('0.0.0.0', int(os.environ.get('PORT', 3000)), app)
