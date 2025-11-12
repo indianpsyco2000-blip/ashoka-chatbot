@@ -9,10 +9,10 @@ from openai import OpenAI
 app = Flask(__name__)
 CORS(app)
 
-# === GROK API ===
+# === OPENROUTER API (FREE) ===
 client = OpenAI(
-    api_key=os.getenv("GROK_API_KEY"),
-    base_url="https://api.x.ai/v1"
+    api_key=os.getenv("OPENROUTER_API_KEY"),
+    base_url="https://openrouter.ai/api/v1"
 )
 
 # === LOAD & INDEX DATA ===
@@ -59,13 +59,13 @@ def chat():
 
     try:
         resp = client.chat.completions.create(
-            model="grok-beta",
+            model="deepseek/deepseek-r1:free",  # FREE MODEL
             messages=[{"role": "user", "content": prompt}],
             max_tokens=500
         )
         answer = resp.choices[0].message.content.strip()
     except Exception as e:
-        answer = f"Error: {e}"
+        answer = f"API error: {e}"
 
     return jsonify({'response': answer})
 
