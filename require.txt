@@ -1,6 +1,0 @@
-flask
-flask-cors
-sentence-transformers
-faiss-cpu
-openai
-gunicorn  # Optional, but helps with builds
