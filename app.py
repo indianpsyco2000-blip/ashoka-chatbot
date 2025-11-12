@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import os
 import faiss
@@ -6,10 +6,10 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from openai import OpenAI
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 CORS(app)
 
-# === OPENROUTER (FREE) ===
+# === OPENROUTER API (FREE) ===
 client = OpenAI(
     api_key=os.getenv("OPENROUTER_API_KEY"),
     base_url="https://openrouter.ai/api/v1"
@@ -48,7 +48,7 @@ Answer:
 
 @app.route('/')
 def home():
-    return open('chatbot.html', 'r', encoding='utf-8').read()
+    return send_from_directory('static', 'chatbot.html')
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -71,7 +71,5 @@ def chat():
 
     return jsonify({'response': answer})
 
-# Vercel entry point
-def handler(event, context=None):
-    from werkzeug.serving import run_simple
-    return run_simple('0.0.0.0', int(os.environ.get('PORT', 3000)), app)
+if __name__ == '__main__':
+    app.run()
