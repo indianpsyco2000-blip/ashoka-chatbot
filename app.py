@@ -1,25 +1,24 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from openai import OpenAI
 
-app = Flask(__name__, static_folder='../static')
+app = Flask(__name__, static_folder='.')
 CORS(app)
 
+# OpenRouter (free)
 client = OpenAI(
     api_key=os.getenv("OPENROUTER_API_KEY"),
     base_url="https://openrouter.ai/api/v1"
 )
 
-# Load data
+# Load data — works because file is in same folder
 with open('ashoka_info.txt', 'r', encoding='utf-8') as f:
     text = f.read()
 
-# Split into paragraphs
 paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]
-
 vectorizer = TfidfVectorizer()
 tfidf_matrix = vectorizer.fit_transform(paragraphs)
 
@@ -40,7 +39,7 @@ Answer:
 
 @app.route('/')
 def home():
-    return send_from_directory('../static', 'chatbot.html')
+    return open('chatbot.html', 'r', encoding='utf-8').read()
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -58,7 +57,10 @@ def chat():
             max_tokens=500
         )
         answer = resp.choices[0].message.content.strip()
-    except Exception as e:
-        answer = "Sorry, AI busy. Try again."
+    except:
+        answer = "AI is busy, try again."
 
     return jsonify({'response': answer})
+
+if __name__ == '__main__':
+    app.run()
