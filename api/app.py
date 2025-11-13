@@ -15,11 +15,8 @@ client = OpenAI(
 )
 
 # Load data
-try:
-    with open('../ashoka_info.txt', 'r', encoding='utf-8') as f:
-        text = f.read()
-except:
-    text = "Ashoka Institute offers B.Tech, M.Tech, MBA. Contact info@ashoka.edu.in"
+with open('../ashoka_info.txt', 'r', encoding='utf-8') as f:
+    text = f.read()
 
 def chunk(text, size=500, overlap=50):
     return [text[i:i+size] for i in range(0, len(text), size-overlap)]
@@ -65,6 +62,6 @@ def chat():
         )
         answer = resp.choices[0].message.content.strip()
     except Exception as e:
-        answer = "Sorry, AI is busy. Try again."
+        answer = "Sorry, AI busy. Try again."
 
     return jsonify({'response': answer})
