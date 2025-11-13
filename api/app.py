@@ -6,21 +6,20 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from openai import OpenAI
 
-app = Flask(__name__, static_folder='static')
+app = Flask(__name__, static_folder='../static')
 CORS(app)
 
-# === OPENROUTER API (FREE) ===
 client = OpenAI(
     api_key=os.getenv("OPENROUTER_API_KEY"),
     base_url="https://openrouter.ai/api/v1"
 )
 
-# === LOAD DATA ===
+# Load data
 try:
-    with open('ashoka_info.txt', 'r', encoding='utf-8') as f:
+    with open('../ashoka_info.txt', 'r', encoding='utf-8') as f:
         text = f.read()
 except:
-    text = "Ashoka Institute offers B.Tech, M.Tech, MBA. Contact: info@ashoka.edu.in"
+    text = "Ashoka Institute offers B.Tech, M.Tech, MBA. Contact info@ashoka.edu.in"
 
 def chunk(text, size=500, overlap=50):
     return [text[i:i+size] for i in range(0, len(text), size-overlap)]
@@ -30,7 +29,6 @@ embedder = SentenceTransformer('all-MiniLM-L6-v2')
 vectors = embedder.encode(chunks).astype('float32')
 index = faiss.IndexFlatL2(vectors.shape[1])
 index.add(vectors)
-print(f"Indexed {len(chunks)} chunks.")
 
 def retrieve(query, k=3):
     q = embedder.encode([query]).astype('float32')
@@ -48,7 +46,7 @@ Answer:
 
 @app.route('/')
 def home():
-    return send_from_directory('static', 'chatbot.html')
+    return send_from_directory('../static', 'chatbot.html')
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -67,9 +65,6 @@ def chat():
         )
         answer = resp.choices[0].message.content.strip()
     except Exception as e:
-        answer = f"AI error: {e}"
+        answer = "Sorry, AI is busy. Try again."
 
     return jsonify({'response': answer})
-
-if __name__ == '__main__':
-    app.run()

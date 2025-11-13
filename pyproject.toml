@@ -15,6 +15,3 @@ dependencies = [
     "numpy==1.24.3",
     "torch==2.0.1"
 ]
-
-[tool.setuptools.packages.find]
-where = ["."]
