@@ -14,8 +14,8 @@ client = OpenAI(
     base_url="https://openrouter.ai/api/v1"
 )
 
-# Load data
-with open('../ashoka_info.txt', 'r', encoding='utf-8') as f:
+# FIXED: File is now in same folder
+with open('ashoka_info.txt', 'r', encoding='utf-8') as f:
     text = f.read()
 
 def chunk(text, size=500, overlap=50):
@@ -65,3 +65,6 @@ def chat():
         answer = "Sorry, AI busy. Try again."
 
     return jsonify({'response': answer})
+
+if __name__ == '__main__':
+    app.run()
