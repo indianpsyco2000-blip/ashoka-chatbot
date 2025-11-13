@@ -14,9 +14,15 @@ client = OpenAI(
     base_url="https://openrouter.ai/api/v1"
 )
 
-# FIXED: File is now in same folder
-with open('ashoka_info.txt', 'r', encoding='utf-8') as f:
-    text = f.read()
+# ROBUST FILE PATH — WORKS EVERYWHERE
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+txt_path = os.path.join(BASE_DIR, 'ashoka_info.txt')
+
+try:
+    with open(txt_path, 'r', encoding='utf-8') as f:
+        text = f.read()
+except FileNotFoundError:
+    text = "Ashoka Institute offers B.Tech, M.Tech, MBA. Contact info@ashoka.edu.in"
 
 def chunk(text, size=500, overlap=50):
     return [text[i:i+size] for i in range(0, len(text), size-overlap)]
@@ -28,7 +34,7 @@ index = faiss.IndexFlatL2(vectors.shape[1])
 index.add(vectors)
 
 def retrieve(query, k=3):
-    q = embedder.encode([query]).astype('float32')
+    q = embedder.embedder.encode([query]).astype('float32')
     _, I = index.search(q, k)
     return "\n\n".join([chunks[i] for i in I[0]])
 
@@ -65,6 +71,3 @@ def chat():
         answer = "Sorry, AI busy. Try again."
 
     return jsonify({'response': answer})
-
-if __name__ == '__main__':
-    app.run()
