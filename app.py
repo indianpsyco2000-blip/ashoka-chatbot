@@ -5,16 +5,16 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from openai import OpenAI
 
-app = Flask(__name__, static_folder='.')
+app = Flask(__name__)
 CORS(app)
 
-# OpenRouter (free)
+# Free AI via OpenRouter
 client = OpenAI(
     api_key=os.getenv("OPENROUTER_API_KEY"),
     base_url="https://openrouter.ai/api/v1"
 )
 
-# Load data — works because file is in same folder
+# Load data — file is in same folder
 with open('ashoka_info.txt', 'r', encoding='utf-8') as f:
     text = f.read()
 
@@ -58,7 +58,7 @@ def chat():
         )
         answer = resp.choices[0].message.content.strip()
     except:
-        answer = "AI is busy, try again."
+        answer = "Sorry, the AI is busy. Try again in a moment."
 
     return jsonify({'response': answer})
 
